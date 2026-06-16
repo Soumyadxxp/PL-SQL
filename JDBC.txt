@@ -1,0 +1,634 @@
+JAVA DATABASE CONNECTIVITY USING ORACLE DATABASE :
+DISPLAY THE LIST OF TABLES FOR THE USER ACCOUNT HR :
+package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSetMetaData;
+import java.sql.ResultSet;
+import java.sql.DatabaseMetaData;
+
+public class MainClass 
+{
+
+    
+    public static void main(String[] args) 
+    {
+       try
+       {
+           Class.forName("oracle.jdbc.driver.OracleDriver");
+           Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","hr");
+           DatabaseMetaData dbasemeta = con.getMetaData();
+           ResultSet resultset = dbasemeta.getTables("%", "HR", "%", new String[]{"TABLE"});
+           ResultSetMetaData resultsetmeta = resultset.getMetaData();
+         //  System.out.println("Connection established Successfully");
+           System.out.println(resultsetmeta.getColumnName(3));
+           System.out.println("----------------------------");
+           while(resultset.next()) System.out.println(resultset.getString(3));
+           con.close();
+       }
+       catch(Exception ex)
+       {
+           System.out.println(ex);
+       }
+    }
+    
+}
+____________________________________________________________
+
+ CHECK OUT IF THE TABLE "EMPLOYEES" EXIST OR NOT FOR THE USER "HR" :
+package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSetMetaData;
+import java.sql.ResultSet;
+import java.sql.DatabaseMetaData;
+
+public class MainClass 
+{
+
+    
+    public static void main(String[] args) 
+    {
+       try
+       {
+           Class.forName("oracle.jdbc.driver.OracleDriver");
+           Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","hr");
+           DatabaseMetaData dbasemeta = con.getMetaData();
+           ResultSet resultset = dbasemeta.getTables("%", "HR", "EMPLOYEES", new String[]{"TABLE"});
+           if(resultset.next())
+              System.out.println("EMPLOYEES TABLE ALREADY EXISTS");
+           else
+              System.out.println("EMPLOYEES TABLE does not EXISTS");
+           con.close();
+           
+       }
+       catch(Exception ex)
+       {
+           System.out.println(ex);
+       }
+    }
+    
+}
+____________________________________________________________
+DISPLAY THE STRUCTURE (META DATA) OF EMPLOYEES TABLE :
+ package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSetMetaData;
+import java.sql.ResultSet;
+import java.sql.DatabaseMetaData;
+
+public class MainClass 
+{
+
+    
+    public static void main(String[] args) 
+    {
+       try
+       {
+           Class.forName("oracle.jdbc.driver.OracleDriver");
+           Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","hr");
+           DatabaseMetaData dbasemeta = con.getMetaData();
+           ResultSet resultset = dbasemeta.getColumns("%", "%", "EMPLOYEES", "%");
+          ResultSetMetaData resultmeta = resultset.getMetaData();
+          String caption = "";
+          caption = String.format("%-15s|", resultmeta.getColumnName(4));
+          caption += String.format("%-15s|", resultmeta.getColumnName(6));
+          caption += String.format("%-15s|", resultmeta.getColumnName(7));
+          caption += String.format("%-15s|", resultmeta.getColumnName(9));
+          System.out.println("STRUCTURE OF EMPLOYEES TABLE ");
+          System.out.println("---------------+----------------+---------------+---------------+ ");
+          System.out.println(caption);
+          System.out.println("---------------+----------------+---------------+---------------+ ");
+          while(resultset.next()) System.out.printf("%-15s|%-15s|%-15s|%-15s|\n", resultset.getString(4),resultset.getString(6),resultset.getString(7),resultset.getString(9));
+           con.close();
+           
+       }
+       catch(Exception ex)
+       {
+           System.out.println(ex);
+       }
+    }
+    
+}
+__________________________________________________________
+create table , record update delete insert : create table employee with the following schema :
+1) code number(4) primary key
+2) name varchar2(20)
+3) salary number(8)
+insert the record (1001,'rajesh kumar',25000)
+change name to 'Rajiv kumar' and salary to 35000
+then delete the record
+
+statement class -sql, interpreter based only one object for every query 
+prepared statement -sql, compiler based, each and every object should be created for each and every querie
+callable statement -pl/sql, both based 
+__________________________________________________________________________________________________________________
+CODE FROM CREATING TABLE :
+package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSetMetaData;
+import java.sql.ResultSet;
+import java.sql.DatabaseMetaData;
+import java.sql.Statement;
+
+public class MainClass 
+{
+
+    
+    public static void main(String[] args) 
+    {
+       try
+       {
+           Class.forName("oracle.jdbc.driver.OracleDriver");
+           Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","hr");
+           Statement smt = con.createStatement();
+           DatabaseMetaData dbasemeta = con.getMetaData();
+          ResultSet result = dbasemeta.getTables("%", "HR", "EMPLOYEE", new String[]{"TABLE"});
+          if(!result.next())
+          {
+           
+           // CREATING TABLE 'EMPLOYEE' WITH THE FIELDS CODE, NAME AND SALARY
+           String sql = "CREATE TABLE EMPLOYEE(CODE NUMBER(4) PRIMARY KEY, NAME VARCHAR(20) NOT NULL, SALARY NUMBER(8))";
+           smt.executeUpdate(sql);
+           
+           System.out.println("table created succesfully");
+          }
+          System.out.println("program executed succesfully");
+           con.close();
+       }
+       catch(Exception ex)
+       {
+           System.out.println(ex);
+       }
+    }
+    
+}
+__________________________________________________________________________________-
+code for insertion of record :
+package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSetMetaData;
+import java.sql.ResultSet;
+import java.sql.DatabaseMetaData;
+import java.sql.Statement;
+import java.util.Scanner;
+
+public class MainClass 
+{
+
+    
+    public static void main(String[] args) 
+    {
+       try
+       {
+           int code;
+           String name;
+           int sal;
+           Scanner sc = new Scanner(System.in);
+           System.out.print("Enter Employee code : ");
+           code = sc.nextInt();
+           sc.skip("\n");
+           System.out.print("Enter Employee name : ");
+           name = sc.nextLine();
+           System.out.print("Enter Employee salary : ");
+           sal = sc.nextInt();
+           Class.forName("oracle.jdbc.driver.OracleDriver");
+           Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","hr");
+           Statement smt = con.createStatement();
+           DatabaseMetaData dbasemeta = con.getMetaData();
+          ResultSet result = dbasemeta.getTables("%", "HR", "EMPLOYEE", new String[]{"TABLE"});
+          if(result.next())
+          {
+           
+           // INSERTING DATA INTO THE TABLE 'EMPLOYEE' WITH THE FIELDS CODE, NAME AND SALARY
+           String sql = "INSERT INTO EMPLOYEE VALUES("+code+",'"+name+"',"+sal+")";
+           smt.executeUpdate(sql);
+           
+           System.out.println("Record inserted succesfully");
+          }
+          else
+          System.out.println("Employee table not created");
+           con.close();
+       }
+       catch(Exception ex)
+       {
+           System.out.println(ex);
+       }
+    }
+    
+}
+_____________________________________________________________________________________________________________
+updation code for records:
+package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSetMetaData;
+import java.sql.ResultSet;
+import java.sql.DatabaseMetaData;
+import java.sql.Statement;
+import java.util.Scanner;
+
+public class MainClass 
+{
+
+    
+    public static void main(String[] args) 
+    {
+       try
+       {
+           //int code;
+           //String name;
+           //int sal;
+           //Scanner sc = new Scanner(System.in);
+           //System.out.print("Enter Employee code : ");
+           //code = sc.nextInt();
+           //sc.skip("\n");
+           //System.out.print("Enter Employee name : ");
+           //name = sc.nextLine();
+           //System.out.print("Enter Employee salary : ");
+           //sal = sc.nextInt();
+           Class.forName("oracle.jdbc.driver.OracleDriver");
+           Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","hr");
+           Statement smt = con.createStatement();
+           DatabaseMetaData dbasemeta = con.getMetaData();
+          ResultSet result = dbasemeta.getTables("%", "HR", "EMPLOYEE", new String[]{"TABLE"});
+          if(result.next())
+          {
+           
+           // updating  DATA from THE TABLE 'EMPLOYEE' 
+           String sql = "UPDATE EMPLOYEE SET NAME='Rajiv kumar', salary=35000 WHERE code=1001";
+           smt.executeUpdate(sql);
+           
+           System.out.println("Record updated succesfully");
+          }
+          else
+          System.out.println("Employee table not created");
+           con.close();
+       }
+       catch(Exception ex)
+       {
+           System.out.println(ex);
+       }
+    }
+    
+}
+________________________________________________________________________________
+code for deleting record :
+package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSetMetaData;
+import java.sql.ResultSet;
+import java.sql.DatabaseMetaData;
+import java.sql.Statement;
+import java.util.Scanner;
+
+public class MainClass 
+{
+
+    
+    public static void main(String[] args) 
+    {
+       try
+       {
+           //int code;
+           //String name;
+           //int sal;
+           //Scanner sc = new Scanner(System.in);
+           //System.out.print("Enter Employee code : ");
+           //code = sc.nextInt();
+           //sc.skip("\n");
+           //System.out.print("Enter Employee name : ");
+           //name = sc.nextLine();
+           //System.out.print("Enter Employee salary : ");
+           //sal = sc.nextInt();
+           Class.forName("oracle.jdbc.driver.OracleDriver");
+           Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","hr");
+           Statement smt = con.createStatement();
+           DatabaseMetaData dbasemeta = con.getMetaData();
+          ResultSet result = dbasemeta.getTables("%", "HR", "EMPLOYEE", new String[]{"TABLE"});
+          if(result.next())
+          {
+           
+           // updating  DATA from THE TABLE 'EMPLOYEE' 
+           String sql = "DELETE FROM EMPLOYEE WHERE code=1001";
+           smt.executeUpdate(sql);
+           
+           System.out.println("Record deleted succesfully");
+          }
+          else
+          System.out.println("Employee table not created");
+           con.close();
+       }
+       catch(Exception ex)
+       {
+           System.out.println(ex);
+       }
+    }
+    
+}
+_______________________________________________________________________________________________________________
+SELECTING AND DISPLAYING ALL THE EMPLOYEE DETAILS FROM THE TABLE EMPLOYEES UNDER EMPLOYEES OF 'HR' :
+1st way :
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+public class MainClass
+{
+    public static void main(String[] args) 
+    {
+        try
+        {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","HR");
+            Statement smt = con.createStatement();
+            
+            //SELECTING DATA FROM TABLE 'EMPLOYEES'
+            String sql = "SELECT LPAD(EMPLOYEE_ID,4),RPAD(FIRST_NAME,15),LPAD(SALARY,6),LPAD(DEPARTMENT_ID,4) FROM EMPLOYEES ORDER BY EMPLOYEE_ID";
+            ResultSet result = smt.executeQuery(sql);
+            System.out.println("----+---------------+------+----");
+            System.out.println("CODE|EMPLOYEE NAME  |SALARY|DEPT");
+            System.out.println("----+---------------+------+----");
+            while(result.next())
+            {
+                String  code = result.getString(1);
+                String  name = result.getString(2);
+                String  slry = result.getString(3);
+                String  dept = result.getString(4);
+                System.out.println(code+"|"+name+"|"+slry+"|"+dept);
+            }
+            System.out.println("----+---------------+------+----");
+            con.close();
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex);
+        }
+    }
+}
+___________________________________________________________________________________________________________________________
+2nd way : package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+public class MainClass 
+{
+    public static void main(String[] args) 
+    {
+        try
+        {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+
+            Connection con = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:XE",
+                "HR",
+                "hr"
+            );
+
+            Statement smt = con.createStatement();
+
+            String sql =
+                "SELECT EMPLOYEE_ID, FIRST_NAME, DEPARTMENT_ID, SALARY " +
+                "FROM EMPLOYEES ORDER BY EMPLOYEE_ID";
+
+            ResultSet result = smt.executeQuery(sql);
+
+            // Header
+            System.out.printf(
+                "%-10s %-15s %-15s %-10s%n",
+                "EMP_ID", "FIRST_NAME", "DEPT_ID", "SALARY"
+            );
+            System.out.println("----------------------------------------------------------");
+
+            // Rows
+            while (result.next())
+            {
+                int empId = result.getInt(1);
+                String firstName = result.getString(2);
+                int deptId = result.getInt(3);
+                double salary = result.getDouble(4);
+
+                System.out.printf("%-10d %-15s %-15d %-10.2f%n",empId, firstName, deptId, salary);
+            }
+
+            con.close();
+        }
+        catch (Exception ex)
+        {
+            System.out.println("Error: " + ex);
+        }
+    }
+}
+__________________________________________________________________________________________________________________
+
+NOTE : BY DEFAULT JDBC CREATE AN USCROLLABLE CURSOR.
+FEATURE OF UNSCROLLABE CURSOR : WE CAN REACH TO THE LAST ROW AFTER SELECTING OR FETCHING ALL THE ROWS ONE BY ONE IN FINE WE CANNOT NAVIGATE THROUGH THE CURSOR RANDOMLY. BUT SOMETIMES RANDOM NAVIGATION WITHIN THE CURSOR IS REQUIRED IN THAT CASE WE SHOULD CREATE A SCROLLABLE CURSOR.  
+
+select and display all the employee details from the table EMPLOYEES creating a scrollable cursor using statement class. display error message if nothing is registered :
+example 1:
+
+package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+public class MainClass
+{
+    public static void main(String[] args) 
+    {
+        try
+        {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","hr");
+            Statement smt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
+            
+            //SELECTING DATA FROM TABLE 'EMPLOYEES'
+            String sql = "SELECT LPAD(EMPLOYEE_ID,4),RPAD(FIRST_NAME,15),LPAD(SALARY,6),LPAD(DEPARTMENT_ID,4) FROM EMPLOYEES ORDER BY EMPLOYEE_ID";
+            ResultSet result = smt.executeQuery(sql);
+            result.last();
+            
+                String  code = result.getString(1);
+                String  name = result.getString(2);
+                String  slry = result.getString(3);
+                String  dept = result.getString(4);
+                System.out.println(code+"|"+name+"|"+slry+"|"+dept);
+            
+            
+            con.close();
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex);
+        }
+    }
+}
+____________________________________________________________________________________________________
+
+example 2: 
+package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+public class MainClass
+{
+    public static void main(String[] args) 
+    {
+        try
+        {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","hr");
+            Statement smt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
+            
+            
+            String sql = "SELECT CODE,NAME,SALARY FROM EMPLOYEE ORDER BY CODE";
+            ResultSet result = smt.executeQuery(sql);
+            if(!result.next())
+                System.out.println("No employee registered");
+            else
+            {
+                result.beforeFirst();
+                while(result.next())
+                {
+                String  code = result.getString(1);
+                String  name = result.getString(2);
+                String  slry = result.getString(3);
+                
+                System.out.println(code+"|"+name+"|"+slry);
+                }
+            }
+            
+            
+            con.close();
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex);
+        }
+    }
+}
+__________________________________________________________________________________________________________________
+example 3:
+
+package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Scanner;
+
+public class MainClass
+{
+    public static void main(String[] args) 
+    {
+        try
+        {
+            int code=0;
+            String name= "";
+            int salary=0;
+            Scanner sc = new Scanner(System.in);
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","hr");
+            Statement smt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
+            String sql = "SELECT CODE FROM EMPLOYEE ORDER BY CODE";
+            ResultSet result = smt.executeQuery(sql);
+            result.last();
+            code = result.getInt(1);
+            code++;
+            System.out.println("Code Generated : " +code);
+            System.out.print("Employee name  : ");
+            name = sc.nextLine();
+            System.out.print("Basic salary  : ");
+            salary = sc.nextInt();
+            sql="INSERT INTO EMPLOYEE VALUES("+code+",'"+name+"',"+salary+")";
+            smt.executeUpdate(sql);
+            System.out.println("\nEmployee Registered Successfully\n");
+            
+            
+            con.close();
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex);
+        }
+    }
+}
+______________________________________________________________________________________
+
+CREATE TABLE EMPLOYEE WITH THE FOLLOWING SCHEMA , INSERT A RECORD INTO IT USING PREPARED STATEMENT CLASS :
+
+CODE, PRIMARY KEY NUMBER(4)
+NAME, NOT NULL VARCHAR(20)
+SALARY, NOT NULL  NUMBER(8)
+package applicationpack;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.PreparedStatement;
+import java.util.Scanner;
+
+public class MainClass
+{
+    public static void main(String[] args) 
+    {
+        try
+        {
+            int code;
+            String name;
+            int salary;
+            Scanner sc = new Scanner(System.in);
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","HR","hr");
+            
+            String sql = "INSERT INTO EMPLOYEE VALUES(?,?,?)";
+            PreparedStatement pmt = con.prepareStatement(sql);
+            System.out.println("Employee Code : " );
+            code = sc.nextInt();
+            sc.skip("\n");
+            System.out.print("Employee name  : ");
+            name = sc.nextLine();
+            System.out.print("Basic salary  : ");
+            salary = sc.nextInt();
+            pmt.setInt(1,code);
+            pmt.setString(2,name);
+            pmt.setInt(3,salary);
+            pmt.executeUpdate();
+            
+            System.out.println("\nEmployee Registered Successfully\n");
+            
+            
+            con.close();
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex);
+        }
+    }
+}
+
+
+
+
+
